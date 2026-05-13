@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="login-body">
+
+<div class="top-bar">
+  <img src="logo.png" class="logo">
+  <span class="logo-text">BasketSport</span>
+</div>
+
+<div class="login-container">
+  <div class="login-box">
+
+    <input id="correo" placeholder="Email">
+    <input id="pass" type="password" placeholder="Contraseña">
+
+    <button onclick="entrar()">Entrar</button>
+    <p id="msg"></p>
+
+  </div>
+</div>
+
+<p class="footer">BasketSport ©2026</p>
+
+<script>
+function entrar(){
+  let c = document.getElementById("correo").value;
+  let p = document.getElementById("pass").value;
+
+  if(!c.includes("@gmail.com")){
+    msg.innerText = "Correo inválido";
+    return;
+  }
+
+  if(p.length == 0){
+    msg.innerText = "Falta contraseña";
+    return;
+  }
+
+  window.location = "dashboard.html";
+}
+</script>
+
+</body>
+</html>

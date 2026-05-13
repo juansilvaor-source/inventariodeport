@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="dashboard-body">
+
+<div class="top-bar">
+  <img src="logo.png" class="logo">
+  <span class="logo-text">BasketSport</span>
+</div>
+
+<div class="container">
+
+  <div class="menu">
+    <div>
+      <h3>Menú</h3>
+      <a onclick="mostrar('perfil')">Usuario</a>
+      <a onclick="mostrar('form')">Registrar</a>
+      <a onclick="mostrar('tabla')">Consultar</a>
+    </div>
+
+    <div>
+      <a onclick="cerrarSesion()">Cerrar sesión</a>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="card seccion" id="perfil">
+      <img src="user.png" id="imgUser">
+      <h3>Juan Felipe</h3>
+
+      <input id="correoUser" value="juanfelipe@gmail.com" disabled>
+      <input id="numeroUser" value="317234999" disabled>
+
+      <button onclick="activarEdicion()">Modificar</button>
+      <button onclick="guardarUsuario()">Guardar</button>
+    </div>
+
+    <div class="card seccion" id="form">
+      <h3>Registrar producto</h3>
+
+      <input id="nombre" placeholder="Producto">
+      <input id="categoria" placeholder="Categoría">
+      <input id="cantidad" placeholder="Cantidad">
+      <input id="precio" placeholder="Precio">
+
+      <button onclick="guardar()">Guardar</button>
+    </div>
+
+    <div class="card seccion" id="tabla">
+      <h3>Inventario</h3>
+
+      <input id="buscar" placeholder="Buscar" onkeyup="buscarProducto()">
+
+      <table>
+        <tr>
+          <th>#</th>
+          <th>Producto</th>
+          <th>Categoría</th>
+          <th>Cantidad</th>
+          <th>Precio</th>
+          <th>Acción</th>
+        </tr>
+        <tbody id="tabla-body"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let productos = [];
+
+function mostrar(id){
+  document.querySelectorAll(".seccion").forEach(s => s.style.display="none");
+  document.getElementById(id).style.display="block";
+}
+mostrar("perfil");
+
+function cerrarSesion(){
+  window.location = "index.html";
+}
+
+function guardar(){
+  let nombre = document.getElementById("nombre").value;
+  let categoria = document.getElementById("categoria").value;
+  let cantidad = document.getElementById("cantidad").value;
+  let precio = document.getElementById("precio").value;
+
+  if(nombre && categoria && cantidad && precio){
+    productos.push({nombre, categoria, cantidad, precio});
+    mostrarTabla(productos);
+    mostrar("tabla");
+  }
+}
+
+function mostrarTabla(lista){
+  let tabla = document.getElementById("tabla-body");
+  tabla.innerHTML = "";
+
+  lista.forEach((p,i)=>{
+    tabla.innerHTML += `
+    <tr>
+      <td>${i+1}</td>
+      <td>${p.nombre}</td>
+      <td>${p.categoria}</td>
+      <td>${p.cantidad}</td>
+      <td>${p.precio}</td>
+      <td>
+        <button onclick="editar(${i})">Editar</button>
+        <button onclick="eliminar(${i})">Eliminar</button>
+      </td>
+    </tr>`;
+  });
+}
+
+function eliminar(i){
+  productos.splice(i,1);
+  mostrarTabla(productos);
+}
+
+function editar(i){
+  let p = productos[i];
+  document.getElementById("nombre").value = p.nombre;
+  document.getElementById("categoria").value = p.categoria;
+  document.getElementById("cantidad").value = p.cantidad;
+  document.getElementById("precio").value = p.precio;
+  eliminar(i);
+  mostrar("form");
+}
+
+function buscarProducto(){
+  let texto = document.getElementById("buscar").value.toLowerCase();
+
+  let filtrados = productos.filter(p =>
+    p.nombre.toLowerCase().includes(texto)
+  );
+
+  mostrarTabla(filtrados);
+}
+
+function activarEdicion(){
+  correoUser.disabled = false;
+  numeroUser.disabled = false;
+}
+
+function guardarUsuario(){
+  correoUser.disabled = true;
+  numeroUser.disabled = true;
+}
+</script>
+
+</body>
+</html>
