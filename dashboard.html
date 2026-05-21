@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html>
 <head>
 <title>Dashboard</title>
@@ -75,6 +75,8 @@
 <script>
 let productos = [];
 
+let usuario = localStorage.getItem("usuario");
+
 function mostrar(id){
   document.querySelectorAll(".seccion").forEach(s => s.style.display="none");
   document.getElementById(id).style.display="block";
@@ -85,25 +87,42 @@ function cerrarSesion(){
   window.location = "index.html";
 }
 
-function guardar(){
-  let nombre = document.getElementById("nombre").value;
-  let categoria = document.getElementById("categoria").value;
-  let cantidad = document.getElementById("cantidad").value;
-  let precio = document.getElementById("precio").value;
+async function cargar(){
+  let res = await fetch(`http://localhost:3000/productos/${usuario}`);
+  productos = await res.json();
+  mostrarTabla(productos);
+}
+window.onload = cargar;
 
-  if(nombre && categoria && cantidad && precio){
-    productos.push({nombre, categoria, cantidad, precio});
-    mostrarTabla(productos);
-    mostrar("tabla");
-  }
+async function guardar(){
+  let producto = {
+    nombre: nombre.value,
+    categoria: categoria.value,
+    cantidad: cantidad.value,
+    precio: precio.value
+  };
+
+  await fetch(`http://localhost:3000/productos/${usuario}`,
+  {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(producto)
+  });
+
+  nombre.value="";
+  categoria.value="";
+  cantidad.value="";
+  precio.value="";
+
+  cargar();
+  mostrar("tabla");
 }
 
 function mostrarTabla(lista){
-  let tabla = document.getElementById("tabla-body");
-  tabla.innerHTML = "";
+  tablaBody.innerHTML = "";
 
   lista.forEach((p,i)=>{
-    tabla.innerHTML += `
+    tablaBody.innerHTML += `
     <tr>
       <td>${i+1}</td>
       <td>${p.nombre}</td>
@@ -118,23 +137,27 @@ function mostrarTabla(lista){
   });
 }
 
-function eliminar(i){
-  productos.splice(i,1);
-  mostrarTabla(productos);
+async function eliminar(i){
+  await fetch(`http://localhost:3000/productos/${usuario}/${i}`, {
+    method: "DELETE"
+  });
+  cargar();
 }
 
 function editar(i){
   let p = productos[i];
-  document.getElementById("nombre").value = p.nombre;
-  document.getElementById("categoria").value = p.categoria;
-  document.getElementById("cantidad").value = p.cantidad;
-  document.getElementById("precio").value = p.precio;
+
+  nombre.value = p.nombre;
+  categoria.value = p.categoria;
+  cantidad.value = p.cantidad;
+  precio.value = p.precio;
+
   eliminar(i);
   mostrar("form");
 }
 
 function buscarProducto(){
-  let texto = document.getElementById("buscar").value.toLowerCase();
+  let texto = buscar.value.toLowerCase();
 
   let filtrados = productos.filter(p =>
     p.nombre.toLowerCase().includes(texto)
@@ -152,6 +175,13 @@ function guardarUsuario(){
   correoUser.disabled = true;
   numeroUser.disabled = true;
 }
+
+let nombre = document.getElementById("nombre");
+let categoria = document.getElementById("categoria");
+let cantidad = document.getElementById("cantidad");
+let precio = document.getElementById("precio");
+let tablaBody = document.getElementById("tabla-body");
+let buscar = document.getElementById("buscar");
 </script>
 
 </body>

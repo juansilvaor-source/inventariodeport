@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html>
 <head>
 <title>Login</title>
@@ -19,6 +19,11 @@
     <input id="pass" type="password" placeholder="Contraseña">
 
     <button onclick="entrar()">Entrar</button>
+
+    <p style="margin-top:10px; cursor:pointer;" onclick="irRegistro()">
+      Crear cuenta
+    </p>
+    
     <p id="msg"></p>
 
   </div>
@@ -27,21 +32,28 @@
 <p class="footer">BasketSport ©2026</p>
 
 <script>
-function entrar(){
+async function entrar(){
   let c = document.getElementById("correo").value;
   let p = document.getElementById("pass").value;
 
-  if(!c.includes("@gmail.com")){
-    msg.innerText = "Correo inválido";
-    return;
-  }
+  let res = await fetch("http://localhost:3000/login", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({correo:c, password:p})
+  });
 
-  if(p.length == 0){
-    msg.innerText = "Falta contraseña";
-    return;
-  }
-
+  let data = await res.json();
+if(data.ok){
+  localStorage.setItem("usuario", c);
   window.location = "dashboard.html";
+} else {
+  msg.innerText = data.mensaje;
+}
+
+}
+
+function irRegistro(){
+  window.location = "registro.html";
 }
 </script>
 
