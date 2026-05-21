@@ -1,0 +1,61 @@
+<!DOCTYPE html> 
+<html>
+<head>
+<title>Login</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="login-body">
+
+<div class="top-bar">
+  <img src="logo.png" class="logo">
+  <span class="logo-text">BasketSport</span>
+</div>
+
+<div class="login-container">
+  <div class="login-box">
+
+    <input id="correo" placeholder="Email">
+    <input id="pass" type="password" placeholder="Contraseña">
+
+    <button onclick="entrar()">Entrar</button>
+
+    <p style="margin-top:10px; cursor:pointer;" onclick="irRegistro()">
+      Crear cuenta
+    </p>
+    
+    <p id="msg"></p>
+
+  </div>
+</div>
+
+<p class="footer">BasketSport ©2026</p>
+
+<script>
+async function entrar(){
+  let c = document.getElementById("correo").value;
+  let p = document.getElementById("pass").value;
+
+  let res = await fetch("http://localhost:3000/login", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({correo:c, password:p})
+  });
+
+  let data = await res.json();
+if(data.ok){
+  localStorage.setItem("usuario", c);
+  window.location = "dashboard.html";
+} else {
+  msg.innerText = data.mensaje;
+}
+
+}
+
+function irRegistro(){
+  window.location = "registro.html";
+}
+</script>
+
+</body>
+</html>

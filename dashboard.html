@@ -1,0 +1,188 @@
+<!DOCTYPE html> 
+<html>
+<head>
+<title>Dashboard</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="dashboard-body">
+
+<div class="top-bar">
+  <img src="logo.png" class="logo">
+  <span class="logo-text">BasketSport</span>
+</div>
+
+<div class="container">
+
+  <div class="menu">
+    <div>
+      <h3>Menú</h3>
+      <a onclick="mostrar('perfil')">Usuario</a>
+      <a onclick="mostrar('form')">Registrar</a>
+      <a onclick="mostrar('tabla')">Consultar</a>
+    </div>
+
+    <div>
+      <a onclick="cerrarSesion()">Cerrar sesión</a>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="card seccion" id="perfil">
+      <img src="user.png" id="imgUser">
+      <h3>Juan Felipe</h3>
+
+      <input id="correoUser" value="juanfelipe@gmail.com" disabled>
+      <input id="numeroUser" value="317234999" disabled>
+
+      <button onclick="activarEdicion()">Modificar</button>
+      <button onclick="guardarUsuario()">Guardar</button>
+    </div>
+
+    <div class="card seccion" id="form">
+      <h3>Registrar producto</h3>
+
+      <input id="nombre" placeholder="Producto">
+      <input id="categoria" placeholder="Categoría">
+      <input id="cantidad" placeholder="Cantidad">
+      <input id="precio" placeholder="Precio">
+
+      <button onclick="guardar()">Guardar</button>
+    </div>
+
+    <div class="card seccion" id="tabla">
+      <h3>Inventario</h3>
+
+      <input id="buscar" placeholder="Buscar" onkeyup="buscarProducto()">
+
+      <table>
+        <tr>
+          <th>#</th>
+          <th>Producto</th>
+          <th>Categoría</th>
+          <th>Cantidad</th>
+          <th>Precio</th>
+          <th>Acción</th>
+        </tr>
+        <tbody id="tabla-body"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let productos = [];
+
+let usuario = localStorage.getItem("usuario");
+
+function mostrar(id){
+  document.querySelectorAll(".seccion").forEach(s => s.style.display="none");
+  document.getElementById(id).style.display="block";
+}
+mostrar("perfil");
+
+function cerrarSesion(){
+  window.location = "index.html";
+}
+
+async function cargar(){
+  let res = await fetch(`http://localhost:3000/productos/${usuario}`);
+  productos = await res.json();
+  mostrarTabla(productos);
+}
+window.onload = cargar;
+
+async function guardar(){
+  let producto = {
+    nombre: nombre.value,
+    categoria: categoria.value,
+    cantidad: cantidad.value,
+    precio: precio.value
+  };
+
+  await fetch(`http://localhost:3000/productos/${usuario}`,
+  {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(producto)
+  });
+
+  nombre.value="";
+  categoria.value="";
+  cantidad.value="";
+  precio.value="";
+
+  cargar();
+  mostrar("tabla");
+}
+
+function mostrarTabla(lista){
+  tablaBody.innerHTML = "";
+
+  lista.forEach((p,i)=>{
+    tablaBody.innerHTML += `
+    <tr>
+      <td>${i+1}</td>
+      <td>${p.nombre}</td>
+      <td>${p.categoria}</td>
+      <td>${p.cantidad}</td>
+      <td>${p.precio}</td>
+      <td>
+        <button onclick="editar(${i})">Editar</button>
+        <button onclick="eliminar(${i})">Eliminar</button>
+      </td>
+    </tr>`;
+  });
+}
+
+async function eliminar(i){
+  await fetch(`http://localhost:3000/productos/${usuario}/${i}`, {
+    method: "DELETE"
+  });
+  cargar();
+}
+
+function editar(i){
+  let p = productos[i];
+
+  nombre.value = p.nombre;
+  categoria.value = p.categoria;
+  cantidad.value = p.cantidad;
+  precio.value = p.precio;
+
+  eliminar(i);
+  mostrar("form");
+}
+
+function buscarProducto(){
+  let texto = buscar.value.toLowerCase();
+
+  let filtrados = productos.filter(p =>
+    p.nombre.toLowerCase().includes(texto)
+  );
+
+  mostrarTabla(filtrados);
+}
+
+function activarEdicion(){
+  correoUser.disabled = false;
+  numeroUser.disabled = false;
+}
+
+function guardarUsuario(){
+  correoUser.disabled = true;
+  numeroUser.disabled = true;
+}
+
+let nombre = document.getElementById("nombre");
+let categoria = document.getElementById("categoria");
+let cantidad = document.getElementById("cantidad");
+let precio = document.getElementById("precio");
+let tablaBody = document.getElementById("tabla-body");
+let buscar = document.getElementById("buscar");
+</script>
+
+</body>
+</html>
